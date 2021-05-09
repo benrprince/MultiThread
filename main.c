@@ -13,7 +13,7 @@
 
 #define MAX_INPUT 1000
 #define NUM_ITEMS 49
-char buffer_1[MAX_INPUT+1];
+char* buffer_1[MAX_INPUT+1];
 int buffer_1_idx = 0;
 
 int more_input = 1;
@@ -59,9 +59,8 @@ void getUserInput(char* input) {
 void put_buff_1(char input[]) {
 
     buffer_1[buffer_1_idx] = input;          // Start Here!!
-    printf("%s", buffer_1[0]);
+    printf("%s", buffer_1[buffer_1_idx]);
     buffer_1_idx = buffer_1_idx + 1;
-
 
 }
 
@@ -71,8 +70,6 @@ void getInput() {
     *   Returns: NA
     *   Desc: Gets input from stdin
     ***********************************************/
-        
-    // char input[MAX_INPUT];
 
     char buffer[MAX_INPUT];
 
