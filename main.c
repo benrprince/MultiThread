@@ -13,8 +13,9 @@
 
 #define MAX_INPUT 1000
 #define NUM_ITEMS 49
-char* buffer_1[MAX_INPUT+1];
+char buffer_1[MAX_INPUT+1];
 int buffer_1_idx = 0;
+int line_count = 0;
 
 int more_input = 1;
 int stop_flag = 0;
@@ -30,37 +31,31 @@ int stopCheck(char buffer[]) {
 
 }
 
-void getUserInput(char* input) {
+void lineSeparator() {
 
-    char buffer[MAX_INPUT];
+    int bufferLength = strlen(buffer_1);
 
-    while (fgets(buffer, sizeof(buffer), stdin) != NULL) {
-        
-        // Get size of current buffer for clearing later
-        size_t buffSize = strlen(buffer);
-        // Check for STOP
-        stop_flag = stopCheck(buffer);
-        // Add to input
-        strcat(input, buffer);
+    for(int i = 0; i <bufferLength; i++) {
 
-        if (stop_flag != 0) {
-            break;
+        if(buffer_1[i] == '\n') {
+            buffer_1[i] = ' ';
         }
-
-        // Clear the buffer for the next fgets
-        for (int i = 0; i < buffSize; i++) {
-            buffer[i] = '\0';
-        }
-
     }
+
+    printf("%s", buffer_1);
 
 }
 
+
 void put_buff_1(char input[]) {
 
-    buffer_1[buffer_1_idx] = input;          // Start Here!!
-    printf("%s", buffer_1[buffer_1_idx]);
-    buffer_1_idx = buffer_1_idx + 1;
+    // buffer_1[buffer_1_idx] = input;
+    // printf("%s", buffer_1[buffer_1_idx]);
+    // buffer_1_idx = buffer_1_idx + 1;
+    // line_count++;
+
+    strcat(buffer_1, input);
+    line_count++;
 
 }
 
@@ -97,26 +92,16 @@ void getInput() {
 
 
 
-    // getUserInput(input);
-    // printf("%s", input);                    // Here for testing purposes, REMOVE LATER
-    // fflush(stdout);                         // Here for testing purposes, REMOVE LATER
-
-
 }
 
 
 
 int main(int argc, char *argv[]) {
 
-    // char *input[MAX_INPUT];
-
-    // while(more_input == 1) {
-
-    //     getInput();
-
-    // }
+    // Each of these will be a thread
 
     getInput();
+    lineSeparator();
 
 
     return 0;
