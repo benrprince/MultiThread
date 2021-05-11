@@ -13,9 +13,14 @@
 
 #define MAX_INPUT 1000
 #define NUM_ITEMS 49
+
+// Buffer 1 variables
 char buffer_1[MAX_INPUT+1];
-int buffer_1_idx = 0;
+//int buffer_1_idx = 0;
 int line_count = 0;
+
+//Buffer 2 variables
+char buffer_2[MAX_INPUT+1];
 
 int more_input = 1;
 int stop_flag = 0;
@@ -31,6 +36,34 @@ int stopCheck(char buffer[]) {
 
 }
 
+void plusSign() {
+
+    int bufferLength = strlen(buffer_2);
+    char updatedString[bufferLength];
+
+    for(int i=0; i <bufferLength; i++) {
+
+        if((buffer_2[i] == '+') && (buffer_2[i] == '+')) {
+
+            buffer_2[i] = '^';
+            for(int j=i+1; j <bufferLength; j++) {
+                buffer_2[j] = buffer_2[j+1];
+            }
+        }
+    }
+
+    printf("%s", buffer_2);
+
+}
+
+void put_buff_2(char input[]) {
+
+    // Probably will put the mutex lock here!!
+    strcat(buffer_2, input);
+
+
+}
+
 void lineSeparator() {
 
     int bufferLength = strlen(buffer_1);
@@ -42,18 +75,15 @@ void lineSeparator() {
         }
     }
 
-    printf("%s", buffer_1);
+    //printf("%s", buffer_1);
+    put_buff_2(buffer_1);
 
 }
 
 
 void put_buff_1(char input[]) {
 
-    // buffer_1[buffer_1_idx] = input;
-    // printf("%s", buffer_1[buffer_1_idx]);
-    // buffer_1_idx = buffer_1_idx + 1;
-    // line_count++;
-
+    // Probably will put the mutex lock here!!
     strcat(buffer_1, input);
     line_count++;
 
@@ -102,6 +132,7 @@ int main(int argc, char *argv[]) {
 
     getInput();
     lineSeparator();
+    plusSign();
 
 
     return 0;
