@@ -19,8 +19,12 @@ char buffer_1[MAX_INPUT+1];
 //int buffer_1_idx = 0;
 int line_count = 0;
 
-//Buffer 2 variables
+// Buffer 2 variables
 char buffer_2[MAX_INPUT+1];
+
+// Buffer 3 variables
+char buffer_3[MAX_INPUT+1];
+int buff3_index = 0;
 
 int more_input = 1;
 int stop_flag = 0;
@@ -36,10 +40,41 @@ int stopCheck(char buffer[]) {
 
 }
 
+void writeOutput() {
+
+    int bufferLength = strlen(buffer_3);
+    char tempString[81];
+    int tempIndex = 0;
+
+    for (int i=buff3_index; i <bufferLength; i++) {
+        
+        tempString[tempIndex] = buffer_3[i];
+        tempIndex++;
+        buff3_index++;
+
+        if (tempIndex == 80) {
+
+            printf("%s\n", tempString);
+            fflush(stdout);
+
+            tempIndex = 0;
+            buff3_index++;
+
+        }
+    }
+}
+
+void put_buff_3(char input[]) {
+
+    // Probably will put the mutex lock here!!
+    strcat(buffer_3, input);
+
+
+}
+
 void plusSign() {
 
     int bufferLength = strlen(buffer_2);
-    char updatedString[bufferLength];
 
     for(int i=0; i <bufferLength; i++) {
 
@@ -51,8 +86,7 @@ void plusSign() {
             }
         }
     }
-
-    printf("%s", buffer_2);
+    put_buff_3(buffer_2);
 
 }
 
@@ -105,13 +139,11 @@ void getInput() {
         // Check for STOP
         stop_flag = stopCheck(buffer);
         // Add to input
-        // strcat(input, buffer);
-
-        put_buff_1(buffer);
-
         if (stop_flag != 0) {
             break;
         }
+
+        put_buff_1(buffer);
 
         // Clear the buffer for the next fgets
         for (int i = 0; i < buffSize; i++) {
@@ -119,8 +151,6 @@ void getInput() {
         }
 
     }
-
-
 
 }
 
@@ -133,7 +163,7 @@ int main(int argc, char *argv[]) {
     getInput();
     lineSeparator();
     plusSign();
-
+    writeOutput();
 
     return 0;
 }
