@@ -214,6 +214,7 @@ void *getInput(void *args) {
 
     char buffer[MAX_INPUT];
 
+    // If there is a redirected file
     while (fgets(buffer, sizeof(buffer), stdin) != NULL) {
         
         // Get size of current buffer for clearing later
@@ -233,6 +234,7 @@ void *getInput(void *args) {
         }
 
     }
+
 }
 
 
@@ -246,11 +248,6 @@ int main(int argc, char *argv[]) {
     pthread_create(&separator_t, NULL, lineSeparator, NULL);
     pthread_create(&plus_t, NULL, plusSign, NULL);
     pthread_create(&output_t, NULL, writeOutput, NULL);
-
-    // getInput();
-    // lineSeparator();
-    // plusSign();
-    // writeOutput();
 
     pthread_join(input_t, NULL);
     pthread_join(separator_t, NULL);
