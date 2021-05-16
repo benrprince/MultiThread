@@ -12,7 +12,7 @@
 #include <string.h>
 
 #define MAX_INPUT 1000
-#define NUM_ITEMS 49
+#define NUM_ITEMS 50
 
 // Buffer 1 and mutex variables
 char buffer_1[NUM_ITEMS+1][MAX_INPUT];
@@ -74,46 +74,48 @@ void get_buff_3(char* buff) {
 void *writeOutput(void *args) {
 
     char buff[MAX_INPUT];
-    get_buff_3(buff);
-    // printf("OutPut Function %s", buff);   // Testing purposes. Remove!!!!!
-    //fflush(stdout);
-    strcat(tempString, buff);
-    int tempLength = strlen(tempString);
+    for (int i = 0; i < NUM_ITEMS; i++) {
+        get_buff_3(buff);
+        // printf("OutPut Function %s", buff);   // Testing purposes. Remove!!!!!
+        //fflush(stdout);
+        strcat(tempString, buff);
+        int tempLength = strlen(tempString);
 
-    //printf("tempString %s", tempString);   //Testing  Remove!!!!!!
+        //printf("tempString %s", tempString);   //Testing  Remove!!!!!!
 
-    char tempBuffer[MAX_INPUT];
-    strcpy(tempBuffer, tempString);
+        char tempBuffer[MAX_INPUT];
+        strcpy(tempBuffer, tempString);
 
-    while (tempLength > 80) {
+        while (tempLength > 80) {
+            //printf("\n**ts%s**\n", tempString);
+            //strcpy(tempString, tempBuffer);
 
-        strcpy(tempString, tempBuffer);
+            for (int i=0; i < 80; i++) {
 
-        for (int i=0; i < 80; i++) {
+                // Print out each character until 80 chars
+                printf("%c", tempString[i]);
+                fflush(stdout);
+                
+                // Replace these chars with endline markers
+                tempString[i] = '\0';
 
-            // Print out each character until 80 chars
-            printf("%c", tempString[i]);
-            fflush(stdout);
-            
-            // Replace these chars with endline markers
-            tempString[i] = '\0';
+            }
+            printf("\n");
 
+            // Shift chars down to the beginning of tempString
+            int tempIndex = 0;
+            for (int i=80; i < tempLength; i++) {
+
+                tempBuffer[tempIndex] = tempString[i];
+                tempIndex = tempIndex + 1;
+
+            }
+            tempBuffer[tempIndex] = '\0';
+            tempLength = strlen(tempBuffer);
+            //printf("\n**bf%s**\n", tempString);
+            strcpy(tempString, tempBuffer);
         }
-        printf("\n");
-
-        // Shift chars down to the beginning of tempString
-        int tempIndex = 0;
-        for (int i=80; i < tempLength; i++) {
-
-            tempBuffer[tempIndex] = tempString[i];
-            tempIndex = tempIndex + 1;
-
-        }
-        tempBuffer[tempIndex+1] = '\0';
-        tempLength = strlen(tempBuffer);
-
     }
-
 }
 
 void put_buff_3(char input[]) {
@@ -154,22 +156,25 @@ void get_buff_2(char* buff) {
 void *plusSign(void *args) {
 
     char buff[MAX_INPUT];
-    get_buff_2(buff);
-    int bufferLength = strlen(buff);
+    for (int i = 0; i < NUM_ITEMS; i++) {
+        get_buff_2(buff);
+        int bufferLength = strlen(buff);
 
-    for(int i=0; i <bufferLength; i++) {
+    
 
-        if((buff[i] == '+') && (buff[i] == '+')) {
+        for(int i=0; i <bufferLength; i++) {
 
-            buff[i] = '^';
-            for(int j=i+1; j <bufferLength; j++) {
-                buff[j] = buff[j+1];
+            if((buff[i] == '+') && (buff[i] == '+')) {
+
+                buff[i] = '^';
+                for(int j=i+1; j <bufferLength; j++) {
+                    buff[j] = buff[j+1];
+                }
             }
         }
+        //printf("**plusSign function**%s", buff);     // This is for testing. Remove!!
+        put_buff_3(buff);
     }
-    //printf("**plusSign function**%s", buff);     // This is for testing. Remove!!
-    put_buff_3(buff);
-
 }
 
 // May need to comment above and test back here.          // This is for testing. Remove!!!
@@ -198,12 +203,14 @@ void get_buff_1(char* buff) {
         pthread_cond_wait(&full_1, &mutex_1);
 
     }
-    
+    //printf("bcount_1 %d\n", count_1);
+
     strcpy(buff, buffer_1[con_idx_1]);
     con_idx_1 = con_idx_1 + 1;
-    printf("Buff %s", buff);
+    
 
     count_1--;
+    //printf("acount_1 %d\n", count_1);
 
     pthread_mutex_unlock(&mutex_1);
     
@@ -212,17 +219,20 @@ void get_buff_1(char* buff) {
 void *lineSeparator(void *args) {
 
     char buff[MAX_INPUT];
-    get_buff_1(buff);
-    int bufferLength = strlen(buff);
+    for (int i = 0; i < NUM_ITEMS; i++) {
 
-    for(int i = 0; i <bufferLength; i++) {
+        get_buff_1(buff);
+        int bufferLength = strlen(buff);
 
-        if(buff[i] == '\n') {
-            buff[i] = ' ';
+        for(int i = 0; i <bufferLength; i++) {
+
+            if(buff[i] == '\n') {
+                buff[i] = ' ';
+            }
         }
+        //printf("**lineSeparator function**%s", buff);      // This is for testing. Remove!!
+        put_buff_2(buff);
     }
-    //printf("**lineSeparator function**%s", buff);      // This is for testing. Remove!!
-    put_buff_2(buff);
 
 }
 
@@ -236,6 +246,7 @@ void put_buff_1(char* input) {
     //printf("buff1 %s", buffer_1[prod_idx_1]);            // This is for testing. Remove!!!
     fflush(stdout);
     prod_idx_1 = prod_idx_1 + 1;
+    //printf("Count_1 %d\n", count_1);                      //This is for testing. Remove!!
     count_1++;
     // Signal that buffer is full
     pthread_cond_signal(&full_1);
@@ -254,8 +265,9 @@ void *getInput(void *args) {
     char buffer[MAX_INPUT];
 
     // If there is a redirected file
+    //pthread_mutex_lock(&mutex_1);                          // Most Likely remove this
     while (fgets(buffer, sizeof(buffer), stdin) != NULL) {
-
+    
         // Get size of current buffer for clearing later
         size_t buffSize = strlen(buffer);
         // Check for STOP
@@ -273,6 +285,9 @@ void *getInput(void *args) {
         }
 
     }
+    //pthread_cond_signal(&full_1);        // Most Likely remove this
+    // Unlock Mutex
+    //pthread_mutex_unlock(&mutex_1);        // Most Likely remove this
 
 }
 
