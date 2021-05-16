@@ -15,21 +15,27 @@
 #define NUM_ITEMS 49
 
 // Buffer 1 and mutex variables
-char buffer_1[MAX_INPUT+1];
+char buffer_1[NUM_ITEMS+1][MAX_INPUT];
 int count_1 = 0;
+int prod_idx_1 = 0;
+int con_idx_1 = 0;
 pthread_mutex_t mutex_1 = PTHREAD_MUTEX_INITIALIZER;
 pthread_cond_t full_1 = PTHREAD_COND_INITIALIZER;
 
 // Buffer 2 and mutex variables
-char buffer_2[MAX_INPUT+1];
+char buffer_2[NUM_ITEMS+1][MAX_INPUT];
 int count_2 = 0;
+int prod_idx_2 = 0;
+int con_idx_2 = 0;
 pthread_mutex_t mutex_2 = PTHREAD_MUTEX_INITIALIZER;
 pthread_cond_t full_2 = PTHREAD_COND_INITIALIZER;
 
 // Buffer 3 and mutex variables
-char buffer_3[MAX_INPUT+1];
+char buffer_3[NUM_ITEMS+1][MAX_INPUT];
 int count_3 = 0;
-int buff3_index = 0;
+int prod_idx_3 = 0;
+int con_idx_3 = 0;
+char tempString[MAX_INPUT];
 pthread_mutex_t mutex_3 = PTHREAD_MUTEX_INITIALIZER;
 pthread_cond_t full_3 = PTHREAD_COND_INITIALIZER;
 
@@ -56,7 +62,8 @@ void get_buff_3(char* buff) {
 
     }
 
-    strcpy(buff, buffer_3);
+    strcpy(buff, buffer_3[con_idx_3]);
+    con_idx_3 = con_idx_3 + 1;
 
     count_3--;
 
@@ -68,26 +75,45 @@ void *writeOutput(void *args) {
 
     char buff[MAX_INPUT];
     get_buff_3(buff);
-    int bufferLength = strlen(buff);
-    char tempString[81];
-    int tempIndex = 0;
+    // printf("OutPut Function %s", buff);   // Testing purposes. Remove!!!!!
+    //fflush(stdout);
+    strcat(tempString, buff);
+    int tempLength = strlen(tempString);
 
-    for (int i=buff3_index; i <bufferLength; i++) {
-        
-        tempString[tempIndex] = buff[i];
-        tempIndex++;
-        buff3_index++;
+    //printf("tempString %s", tempString);   //Testing  Remove!!!!!!
 
-        if (tempIndex == 80) {
+    char tempBuffer[MAX_INPUT];
+    strcpy(tempBuffer, tempString);
 
-            printf("%s\n", tempString);
+    while (tempLength > 80) {
+
+        strcpy(tempString, tempBuffer);
+
+        for (int i=0; i < 80; i++) {
+
+            // Print out each character until 80 chars
+            printf("%c", tempString[i]);
             fflush(stdout);
-
-            tempIndex = 0;
-            buff3_index++;
+            
+            // Replace these chars with endline markers
+            tempString[i] = '\0';
 
         }
+        printf("\n");
+
+        // Shift chars down to the beginning of tempString
+        int tempIndex = 0;
+        for (int i=80; i < tempLength; i++) {
+
+            tempBuffer[tempIndex] = tempString[i];
+            tempIndex = tempIndex + 1;
+
+        }
+        tempBuffer[tempIndex+1] = '\0';
+        tempLength = strlen(tempBuffer);
+
     }
+
 }
 
 void put_buff_3(char input[]) {
@@ -95,7 +121,10 @@ void put_buff_3(char input[]) {
     // Lock Mutex
     pthread_mutex_lock(&mutex_3);
     // Fill buffer
-    strcat(buffer_3, input);
+    strcpy(buffer_3[prod_idx_3], input);
+    //printf("buff3 %s", buffer_3[prod_idx_3]);            // This is for testing. Remove!!!
+    fflush(stdout);
+    prod_idx_3 = prod_idx_3 + 1;
     count_3++;
     // Signal that buffer is full
     pthread_cond_signal(&full_3);
@@ -113,7 +142,8 @@ void get_buff_2(char* buff) {
 
     }
 
-    strcpy(buff, buffer_2);
+    strcpy(buff, buffer_2[con_idx_2]);
+    con_idx_2 = con_idx_2 + 1;
 
     count_2--;
 
@@ -142,12 +172,16 @@ void *plusSign(void *args) {
 
 }
 
+// May need to comment above and test back here.          // This is for testing. Remove!!!
 void put_buff_2(char input[]) {
 
     // Lock Mutex
     pthread_mutex_lock(&mutex_2);
     // Fill buffer
-    strcat(buffer_2, input);
+    strcpy(buffer_2[prod_idx_2], input);
+    //printf("buff2 %s", buffer_2[prod_idx_2]);            // This is for testing. Remove!!!
+    fflush(stdout);
+    prod_idx_2 = prod_idx_2 + 1;
     count_2++;
     // Signal that buffer is full
     pthread_cond_signal(&full_2);
@@ -164,8 +198,10 @@ void get_buff_1(char* buff) {
         pthread_cond_wait(&full_1, &mutex_1);
 
     }
-
-    strcpy(buff, buffer_1);
+    
+    strcpy(buff, buffer_1[con_idx_1]);
+    con_idx_1 = con_idx_1 + 1;
+    printf("Buff %s", buff);
 
     count_1--;
 
@@ -191,12 +227,15 @@ void *lineSeparator(void *args) {
 }
 
 
-void put_buff_1(char input[]) {
+void put_buff_1(char* input) {
 
     // Lock Mutex
     pthread_mutex_lock(&mutex_1);
     // Fill buffer
-    strcat(buffer_1, input);
+    strcpy(buffer_1[prod_idx_1], input);
+    //printf("buff1 %s", buffer_1[prod_idx_1]);            // This is for testing. Remove!!!
+    fflush(stdout);
+    prod_idx_1 = prod_idx_1 + 1;
     count_1++;
     // Signal that buffer is full
     pthread_cond_signal(&full_1);
@@ -216,7 +255,7 @@ void *getInput(void *args) {
 
     // If there is a redirected file
     while (fgets(buffer, sizeof(buffer), stdin) != NULL) {
-        
+
         // Get size of current buffer for clearing later
         size_t buffSize = strlen(buffer);
         // Check for STOP
